@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "AWS Gateway를 이용한 proxy 서버 구축하기"
-excerpt: "JetBrains Academy에서 제공하는 Kotlin 교육 프로그램 강의 노트입니다."
+title: "AWS Gateway를 이용한 프록시 서버 구축하기"
+excerpt: ""
 subtitle: "AWS Gateway"
 toc: true
 toc_sticky: true
@@ -16,9 +16,9 @@ tags: [AWS]
 
 - 공식 홈페이지 - Contact 페이지 내 회사 소개서를 다운로드 시, 입력된 고객사 정보가 Notion 페이지에 자동 저장되는 DB 기능을 구현하려 합니다. 
 
-![homepage.png](https://private-user-images.githubusercontent.com/74516322/287234594-123df5fd-89d7-4220-82cc-beb7f1f282b7.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE3MDE0MjYyNzYsIm5iZiI6MTcwMTQyNTk3NiwicGF0aCI6Ii83NDUxNjMyMi8yODcyMzQ1OTQtMTIzZGY1ZmQtODlkNy00MjIwLTgyY2MtYmViN2YxZjI4MmI3LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzEyMDElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMxMjAxVDEwMTkzNlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTc2ZGNmZDY2YzllZjVjNGY1ZmY5OTlkMWMwNWY2ODQ3MGM5MDI3NTJhYzMwZTIxZmYyZjU0MzBmNGZkYThkNTYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.ZbpG_xw-DMdW8BjHsd-cZocx1fnvt-iJucTYPURqyxQ)
+![homepage.png](https://1drv.ms/i/c/cdf0612ba3befd25/IQNERqJ7LjYdTJ546wHbpeoRAT75S0nPkUTwauzDeF77jRg?width=660)
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled.png)
+![Untitled](https://1drv.ms/i/c/cdf0612ba3befd25/IQMMQkpvGUELSZev2gDnxipvATNfpsMn-Ny33FlCFon76cg?width=660)
 
 - 웹 페이지에서 axios 라이브러리를 활용하여, 직접 노션 서버에 데이터를 보내는 형식으로 구현하려 했으나 CORS 에러가 발생했습니다. 
 - 노션 서버에서 응답을 보낼 때 Header에 Access-Control-Allow-Origin 값을 변경하면 되지만 노션 서버 조작 불가 → Proxy 서버를 이용하여 서버 간 통신으로 CORS 우회 가능한 점을 알 수 있습니다.
@@ -34,26 +34,26 @@ tags: [AWS]
 
 - New integration 생성 버튼을 클릭
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%201.png)
+![Untitled1](https://1drv.ms/i/c/cdf0612ba3befd25/IQPgDt-_VxFERqjE3NczOVFYAYQGc8EmWAtONYiDNBR7PfA?width=432&height=185)
 
 - Secrets은 내부용 통합 토큰으로써 워크 스페이스에 접근을 가능케 합니다. 노션 서버에 API를 보낼 때, header에 들어가게 될 값이니 메모 필수!
 - Integration type은 다른 노션 유저까지 사용할 수 있게 공개하려면 Public integration을 선택하시면 되요.
 - Capabilities 에서는 워크스페이스에 등록된 유저들의 권한을 설정해줍시다. 
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%202.png)
+![Untitled2](https://1drv.ms/i/c/cdf0612ba3befd25/IQOzVAayDJJWTLEfNWSPiVa_AS2_s29eSJZZhXiyepAgYR4?height=660)
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%203.png)
+![Untitled3](https://1drv.ms/i/c/cdf0612ba3befd25/IQOzVAayDJJWTLEfNWSPiVa_AS2_s29eSJZZhXiyepAgYR4?height=660)
 
 - 노션 페이지 생성하기 클릭 - database에 table 항목을 누르면 표가 삽입된 페이지가 생성됩니다.
 - 표 머리글 행에 있는 값들은 querystring 로 인식 ex) 이름=Sasha&회사=Tesla...
 - 노란색 음영 처리된 url은 해당 노션 페이지의 ID 값이며, 이후 body에 들어갈 정보니 메모해둡시다.
 
-![스크린샷](https://github.com/SashainSPb/SashainSPb.github.io/issues/1#issue-2020561091)
+![Untitled4](https://1drv.ms/i/c/cdf0612ba3befd25/IQO9OwmefOboTaW1GBw5cvhHAfyZpgpS1210osczIdqZBbQ?width=660)
 
 - 작성한 integration을 노션 페이지에 연결해줘야 수집 기능을 활성화 시킬 수 있습니다.
 페이지 오른쪽 상단에 share - 검색창 - 해당 integration 클릭!
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%205.png)
+![Untitled5](https://1drv.ms/i/c/cdf0612ba3befd25/IQMujz_U3eaaRofX4bEBfc1iATMzSttVlSSUDsu6qTtApos?width=660)
 
 ---
 
@@ -61,7 +61,7 @@ tags: [AWS]
 
 - Gateway 내 데이터 처리 로직은 다음과 같습니다. 
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%206.png)
+![Untitled6](https://1drv.ms/i/c/cdf0612ba3befd25/IQPAgXZ-14UmSYTdyiT7Zg2IAREX95lcCs4fLX4naXnpEnw?width=660)
 
 ① 메서드 요청: 클라이언트에서 노션에 저장할 데이터를 querystring 형식으로 본 게이트웨이 엔드 포인트로 전달
 
@@ -69,12 +69,12 @@ tags: [AWS]
 
 - 엔드포인트 URL에는 노션 API url을 기재하시면 되요.
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%207.png)
+![Untitled7](https://1drv.ms/i/c/cdf0612ba3befd25/IQOPu1-ZPhJwRo7mhwkS-aOzAciixcx6gnhfaTzq9bzA4D8?width=660)
 
 - HTTP 헤더와 매핑 템플릿에 각각의 정보 입력이 필요한데요,
 - 먼저, HTTP 헤더 내 Notion-Version에는 ‘2021-08-16’ 값을 기입하며 Authorization에는 문자열 Bearer 뒤에 Notion API 생성 시 메모한 토큰 값을 기재해줘요.
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%208.png)
+![Untitled8](https://1drv.ms/i/c/cdf0612ba3befd25/IQN9fs25XdpJToAtq-1E1h7RAcYLn4L53qRoOge5Uu-QoXA?width=660)
 
 <aside>
 💡 값 입력 시 홑따옴표로 꼭 묶어주는거 잊지 맙시다! 
@@ -99,7 +99,7 @@ tags: [AWS]
 - 상기 노션 테이블 생성 시 설정한 **표 머리글 행에 있는 값(ex. company, name, mobile ...)** 쿼리 문자열에 삽입해줍시다~
 - 노션 페이지 내 테이블에 테스트한 값이 제대로 들어갔는지 확인 필수!
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%209.png)
+![Untitled9](https://1drv.ms/i/c/cdf0612ba3befd25/IQPOZ5iuRKeQSoNGCYzTCovsAaGhyMJ1nzO-Mj1luhm0Mok?width=660)
 
 ④ 테스트 통과되면 작업 탭 내 CORS 활성화 및 API 배포를 진행합니다.
 
@@ -116,13 +116,13 @@ tags: [AWS]
 
 - AWS Gateway에서 지원하는 CORS 활성화 기능 관련하여 한 개의 도메인만 인식 가능한 상태에요. 😟😟😟
 - 도메인에 따라서 api를 생성할 수 있지만, 비효율적이며 멀티 도메인을 인식할 수 있게 한다면 간단하게 해결할 수 있네요. → AWS Lambda를 활용하여 멀티 도메인을 인식하게 만드는 로직을 추가해줍시다.
-- AWS Lambda - 새 함수 생성, 런타임은 Node.js, Python, Java 등 다양한 환경을 제공하는 끝내주는 
+- AWS Lambda - 새 함수 생성, 런타임은 Node.js, Python, Java 등 다양한 환경을 제공하는 끝내주는 기능입니다!
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%2010.png)
+![Untitled10](https://1drv.ms/i/c/cdf0612ba3befd25/IQN1xmMUq9E-So56rEuM96nqAdqlz9A-sVbb5TBeC4dbPxU?width=660)
 
 - 노란색 원 부분에 하기의 코드 스니펫을 삽입 후 Deploy 버튼을 눌러서 저장해줍시다.
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%2011.png)
+![Untitled11](https://1drv.ms/i/c/cdf0612ba3befd25/IQPfszPKY4J2S5AJgJ3tw7ZeAfeb-GMK22lVqsHaYTN_-YI?width=660)
 
 - 코드는 크게 request의 origin url이 whitelist에 포함되어 있는지 여부를 판별하는 로직과 노션 서버로 데이터를 가공해서 보내는 로직 두 가지로 구성
 
@@ -205,17 +205,17 @@ tags: [AWS]
   };
   ```
 
-- 테스트에서 간단히 데이터를 보내 함수가 작동하는지 확인 가능하며, 모니터링에 CloudWatch에서 로그 보기를 통해 디버깅 가능
+- 테스트에서 간단히 데이터를 보내 함수가 작동하는지 확인 가능하며, 모니터링에 CloudWatch에서 로그 보기를 통해 제한적으로 디버깅이 가능합니다.
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%2012.png)
+![Untitled12](https://1drv.ms/i/c/cdf0612ba3befd25/IQN6q4roM_D2TJRxknQY6T5uAbK6y0vGzJxTvdfF12BJ3ZM?width=660)
 
 - 트리거는 작성한 lambda 함수를 작동시키기 위한 기능으로 본 프로젝트의 경우, Gateway에서 API call을 받는 단계가 이에 해당. 아래와 같이 함수와 연결될 게이트웨이를 새로 생성
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%2013.png)
+![Untitled13](https://1drv.ms/i/c/cdf0612ba3befd25/IQN3cz2JogXoS4ghQuG4nXxKAQYbxMys1Yt9YVaEvZkZCXM?height=660)
 
 - Gateway 내 데이터 처리 로직은 다음과 같음
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%2014.png)
+![Untitled14](https://1drv.ms/i/c/cdf0612ba3befd25/IQMgJFahVZAsSrNsv5kwJQ3-Ab2NA69o8VskkSqKNzxnLqw?width=660)
 
 ① 메서드 요청: 클라이언트에서 노션에 저장할 데이터를 querystring 형식으로 본 게이트웨이 
 엔드 포인트로 전달
@@ -226,7 +226,7 @@ tags: [AWS]
 
 - 통합 유형은 Lambda 함수로 넣고, 프록시 통합 사용에 체크
 
-![Untitled](AWS%20Gateway%E1%84%85%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%86%A8%E1%84%89%E1%85%B5%20%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%20%E1%84%80%E1%85%AE%E1%84%8E%E1%85%AE%E1%86%A8%E1%84%92%E1%85%A1%E1%84%80%E1%85%B5%2091c50e3fbfeb4e748bf7169c7c2f996e/Untitled%2015.png)
+![Untitled15](https://1drv.ms/i/c/cdf0612ba3befd25/IQN9EiCXN48CR5xWeBZI21uUATECqKky0cErq-JUQDfOT_E?width=660)
 
 ③ API가 잘 작동하는지 임시 테스트 진행 
 

@@ -64,7 +64,7 @@ tags: [Collection, Kotlin]
 
   아래는 코틀린 컬렉션 인터페이스이며, 각 구현체에 대해서 좀 더 자세히 알아보겠습니다. 
 
-  ![Untitled](Kotlin%20%E1%84%8F%E1%85%A5%E1%86%AF%E1%84%85%E1%85%A6%E1%86%A8%E1%84%89%E1%85%A7%E1%86%AB%20%E1%84%8C%E1%85%A5%E1%86%BC%E1%84%85%E1%85%B5%202841a19913764c638e74702b5749ae9d/Untitled.png)
+  ![Untitled](https://1drv.ms/i/c/cdf0612ba3befd25/IQNJm1thM5aQQ5-ZejJ6mWgxAXz8fSbQjzynashPkcOvQdA?width=660)
 
 ---
 
@@ -183,7 +183,7 @@ tags: [Collection, Kotlin]
     println("All keys : ${numberMap.key}") // ["1", "2", "3", "4"]
     println("All values: ${numberMap.values}") [1, 2, 3, 4]
   
-    if ("2" in numberMap) println("Value by key \\"key2\\": ${numbersMap["key2"]}") // "Value by key "2": 2
+    if ("2" in numberMap) println("Value by key \\"key2"\\: ${numbersMap["key2"]}") // "Value by key "2": 2
     if (1 in numbersMap.values) println("The value 1 is in the map") // The value 1 is in the map
     if (numbersMap.containsValue(1)) println("The value 1 is in the map") // The value 1 is in the map
   

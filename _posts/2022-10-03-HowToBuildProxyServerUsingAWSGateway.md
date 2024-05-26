@@ -130,8 +130,7 @@ tags: [AWS]
   const https = require('https')
   // 허용된 origin whitelist
   const allowedOrigins = [
-      "https://www.2bytescorp.com",
-      "https://2bytescorp.com",
+      https://SashaInSPb.co.kr
   ];
   
   // 데이터를 가공해서 notion에 http 요청을 보내는 함수
